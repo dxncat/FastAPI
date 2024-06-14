@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from models.Item import Item
 
-router = APIRouter()
+router = APIRouter(prefix="/items",
+                   tags=["items"],
+                   responses={404: {"message": "No encontrado"}})
 
 productos = [
     Item(id = 1, nombre = "Pantalón jean", descripción = "Pantalón tipo jean oversize con diseño pintado a mano de flores con pinturas para tela en tonalidades fuertes.", precio = 122000, descuento = 70, imagen = "https://i.pinimg.com/736x/ad/95/7a/ad957a8fabe079a049b6237b3417ca5f.jpg", tag = "nuevo"),
@@ -13,11 +15,11 @@ productos = [
 ]
 
 
-@router.get("/items")
+@router.get("/")
 async def items():
     return productos
 
-@router.get("/items/{item_id}")
+@router.get("/{item_id}")
 async def read_item(item_id: int):
     item = filter(lambda x: x.id == item_id, productos)
     try:
@@ -25,7 +27,7 @@ async def read_item(item_id: int):
     except:
         return {"error": "Producto no encontrado"}
     
-@router.get("/items/tags/{item_tag}")
+@router.get("/tags/{item_tag}")
 async def read_item(item_tag: str):
     item = filter(lambda x: x.tag == item_tag, productos)
     try:
