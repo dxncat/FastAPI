@@ -13,6 +13,7 @@ lista_usuarios = [
 
 @router.get("/")
 async def usuarios():
+    print(lista_usuarios)
     return lista_usuarios
 
 @router.get("/{usuario_id}")

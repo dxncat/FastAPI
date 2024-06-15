@@ -1,11 +1,12 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from models.User import User
 import jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
-app = FastAPI()
+router = APIRouter(tags=["auth"],
+                   responses={404: {"message": "No encontrado"}})
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_DURATION = 1
@@ -70,7 +71,7 @@ async def current_user(current: User = Depends(auth_user)):
         raise HTTPException(status_code=400, detail="Usuario inactivo")
     return current
 
-@app.post("/login")
+@router.post("/login")
 async def login(form: OAuth2PasswordRequestForm = Depends()):
     user_db = users_db.get(form.username)
     print(user_db)
@@ -89,6 +90,6 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.get("/users/me")
+@router.get("/users/me")
 async def read_users_me(user: User = Depends(current_user)):
     return user
