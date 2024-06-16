@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 
 class User(BaseModel):
-    id: int
+    id: str | None
     nickname: str
     correo: str
-    direccion: str
-    numero: int
-    es_tienda: bool
+    direccion: str | None
+    numero: int | None
+    es_tienda: bool = False
     desactivado: bool = False
