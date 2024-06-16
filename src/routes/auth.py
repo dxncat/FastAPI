@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from models.User import User
+import models.User as user_entity
 import jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
@@ -41,17 +41,6 @@ users_db = {
         }
 }
 
-class UserDB(User):
-    contraseña: str
-
-def search_user_db(nickname: str):
-    if nickname in users_db:
-        return UserDB(**users_db[nickname])
-
-def search_user(nickname: str):
-    if nickname in users_db:
-        return User(**users_db[nickname])
-
 async def auth_user(token: str = Depends(oauth_schema)):
     exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -64,9 +53,9 @@ async def auth_user(token: str = Depends(oauth_schema)):
             raise exception
     except jwt.PyJWTError:
         raise exception
-    return search_user(user)
+    return user_entity.search_user(user, users_db)
 
-async def current_user(current: User = Depends(auth_user)):
+async def current_user(current: user_entity.User = Depends(auth_user)):
     if current.desactivado:
         raise HTTPException(status_code=400, detail="Usuario inactivo")
     return current
@@ -77,7 +66,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     print(user_db)
     if not user_db:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuario no encontrado")
-    user = search_user_db(form.username)
+    user = user_entity.search_user_db(form.username)
     if not crypt_context.verify(form.password, user.contraseña):
         raise HTTPException(status_code=400, detail="Contraseña incorrecta")
     access_token = jwt.encode(
@@ -91,5 +80,5 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/users/me")
-async def read_users_me(user: User = Depends(current_user)):
+async def read_users_me(user: user_entity.User = Depends(current_user)):
     return user

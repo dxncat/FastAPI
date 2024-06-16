@@ -7,3 +7,4 @@ def user_schema(user) -> dict:
         "numero": user["numero"],
         "es_tienda": user["es_tienda"]
     }
+

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.User import User
+import models.User as user_entity
 from db.client import db_client
 from db.schemas.user import user_schema
 
@@ -7,13 +7,9 @@ router = APIRouter(prefix="/usuarios",
                    tags=["usuarios"],
                    responses={404: {"message": "No encontrado"}})
 
-# lista_usuarios = [
-#     User(id = 1, nickname = "Jorge", correo = "jorge@gmail.com", contraseña = "1234", direccion = "Calle 123", numero = 1234567890, es_tienda = False),
-#     User(id = 2, nickname = "Maria", correo = "maria@gmail.com", contraseña = "1234", direccion = "Calle 123", numero = 1234567890, es_tienda = False),
-#     User(id = 3, nickname = "Tienda1", correo = "tienda1@gmail.com", contraseña = "1234", direccion = "Calle 123", numero = 1234567890, es_tienda = True)
-# ]
+lista_usuarios = db_client.local.users.find({})
 
-@router.get("/")
+@router.get("/", response_model = list(user_entity.User))
 async def usuarios():
     return lista_usuarios
 
@@ -33,21 +29,20 @@ async def read_usuario(id: int):
     except:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
-@router.post("/", response_model=User, status_code=201)
-async def create_usuario(usuario: User):
-
-    # if usuario.nickname in map(lambda x: x.nickname, lista_usuarios):
-    #     raise HTTPException(status_code=400, detail="Usuario ya existe")
+@router.post("/", response_model = user_entity.User, status_code=201)
+async def create_usuario(usuario: user_entity.User):
+    if type(user_entity.User.search_user(usuario.correo, db_client, user_schema)) == user_entity.User:
+        raise HTTPException(status_code=400, detail="Correo ya registrado")
     user_dict = dict(usuario)
     print(user_dict)
     del user_dict["id"]
 
     id = db_client.local.users.insert_one(user_dict).inserted_id
     new_user = user_schema(db_client.local.users.find_one({"_id": id}))
-    return User(**new_user)
+    return user_entity.User(**new_user)
 
 @router.put("/{usuario_id}")
-async def update_usuario(usuario_id: int, usuario: User):
+async def update_usuario(usuario_id: int, usuario: user_entity.User):
     if usuario_id in map(lambda x: x.id, lista_usuarios):
         lista_usuarios[usuario_id - 1] = usuario
         return usuario
