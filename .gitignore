@@ -3,3 +3,6 @@ env/
 
 # Ignorar todas las carpetas __pycache__
 __pycache__/
+
+# Ignorar variables de entorno
+.env

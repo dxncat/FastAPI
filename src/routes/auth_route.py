@@ -4,13 +4,14 @@ import models.User as user_entity
 import jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
+from decouple import config
 
 router = APIRouter(tags=["auth"],
                    responses={404: {"message": "No encontrado"}})
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_DURATION = 1
-SECRETE_KEY = "a4f3b21ab7217595e123359c232ea0cfd3049b1ca9e8056f00dd722700668bf7"
+SECRET_KEY = config("SECRET_KEY")
 
 crypt_context = CryptContext(
         schemes=["bcrypt"],
@@ -48,7 +49,7 @@ async def auth_user(token: str = Depends(oauth_schema)):
         headers={"WWW-Authenticate": "Bearer"}
     )
     try:
-        user = jwt.decode(token, SECRETE_KEY, algorithms=[ALGORITHM]).get("sub")
+        user = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM]).get("sub")
         if user is None:
             raise exception
     except jwt.PyJWTError:
@@ -74,7 +75,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
             "sub": user.nickname,
             "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_DURATION)
         },
-        SECRETE_KEY,
+        SECRET_KEY,
         algorithm=ALGORITHM
     )
     return {"access_token": access_token, "token_type": "bearer"}

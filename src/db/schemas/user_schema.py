@@ -8,3 +8,5 @@ def user_schema(user) -> dict:
         "es_tienda": user["es_tienda"]
     }
 
+def users_schema(users) -> list:
+    return [user_schema(user) for user in users]
