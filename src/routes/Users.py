@@ -43,9 +43,7 @@ async def create_usuario(usuario: User):
     del user_dict["id"]
 
     id = db_client.local.users.insert_one(user_dict).inserted_id
-    print(id)
     new_user = user_schema(db_client.local.users.find_one({"_id": id}))
-    print(new_user)
     return User(**new_user)
 
 @router.put("/{usuario_id}")
