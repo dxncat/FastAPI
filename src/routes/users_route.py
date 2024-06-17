@@ -20,11 +20,11 @@ async def usuarios():
 
 @router.get("/{usuario_id}")
 async def read_usuario(usuario_id: str):
-    return user_entity.User.search_user("_id", ObjectId(usuario_id), db_client, user_schema)
+    return user_entity.User.search_user("_id", ObjectId(usuario_id))
     
 @router.get("/")
 async def read_usuario(id: str):
-        return user_entity.User.search_user("_id", ObjectId(id), db_client, user_schema)
+        return user_entity.User.search_user("_id", ObjectId(id))
 
     
 @router.post("/", response_model = user_entity.User, status_code=201)
@@ -44,7 +44,7 @@ async def update_usuario(usuario: user_entity.User):
         user_dict = dict(usuario)
         del user_dict["id"]
         db_client.users.find_one_and_replace({"_id": ObjectId(usuario.id)}, user_dict)
-        return user_entity.User.search_user("_id", ObjectId(usuario.id), db_client, user_schema)
+        return user_entity.User.search_user("_id", ObjectId(usuario.id))
     except:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     

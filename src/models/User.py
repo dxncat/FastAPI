@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from db.schemas.user_schema import user_schema
+from db.client import db_client
 
 class User(BaseModel):
     id: str = None
@@ -10,5 +12,5 @@ class User(BaseModel):
     es_tienda: bool = False
     desactivado: bool = False
 
-    def search_user(field: str, key, db_client, user_schema):
+    def search_user(field: str, key):
         return User(**user_schema(db_client.users.find_one({field: key})))
