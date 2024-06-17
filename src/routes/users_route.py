@@ -24,7 +24,7 @@ async def read_usuario(usuario_id: str):
     
 @router.get("/")
 async def read_usuario(id: str):
-        return user_entity.User.search_user("_id", ObjectId(id))
+    return user_entity.User.search_user("_id", ObjectId(id))
 
     
 @router.post("/", response_model = user_entity.User, status_code=201)
